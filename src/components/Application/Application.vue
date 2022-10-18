@@ -3,6 +3,7 @@
     <n-dialog-provider>
       <DialogContent />
       <n-notification-provider>
+        <NotificationContent />
         <n-message-provider>
           <MessageContent />
           <slot name="default"></slot>
@@ -22,6 +23,7 @@
   } from 'naive-ui';
   import { MessageContent } from '@/components/MessageContent';
   import { DialogContent } from '@/components/DialogContent';
+  import { NotificationContent } from '@/components/NotificationContent';
 
   export default defineComponent({
     name: 'Application',
@@ -32,6 +34,7 @@
       NLoadingBarProvider,
       MessageContent,
       DialogContent,
+      NotificationContent,
     },
     setup() {
       return {};

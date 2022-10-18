@@ -1,12 +1,9 @@
 {
   "name": "naive-ui-admin",
-  "version": "1.8.1",
+  "version": "1.0.0",
   "author": {
-    "name": "Ahjung",
-    "email": "735878602@qq.com",
-    "url": "https://github.com/jekip/naive-ui-admin"
+    "name": "younger"
   },
-  "private": true,
   "scripts": {
     "bootstrap": "yarn install",
     "serve": "npm run dev",

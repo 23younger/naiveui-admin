@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { store } from '@/store';
 import { ACCESS_TOKEN, CURRENT_USER, IS_LOCKSCREEN } from '@/store/mutation-types';
 import { ResultEnum } from '@/enums/httpEnum';
-
+// import { useAsyncRouteStoreWidthOut } from '@/store/modules/asyncRoute;
 import { getUserInfo, login } from '@/api/system/user';
 import { storage } from '@/utils/Storage';
 
@@ -56,9 +56,9 @@ export const useUserStore = defineStore({
       this.info = info;
     },
     // 登录
-    async login(userInfo) {
+    async login() {
       try {
-        const response = await login(userInfo);
+        const response = await login();
         const { result, code } = response;
         if (code === ResultEnum.SUCCESS) {
           const ex = 7 * 24 * 60 * 60 * 1000;
@@ -67,11 +67,44 @@ export const useUserStore = defineStore({
           storage.set(IS_LOCKSCREEN, false);
           this.setToken(result.token);
           this.setUserInfo(result);
+          window['$notification'].success({
+            content: '登录成功！',
+            meta: `欢迎${result.name}`,
+            duration: 2500,
+          });
+        } else {
+          window['$notification'].error({
+            content: '登录失败',
+            meta: `欢迎${result.name}`,
+            duration: 2500,
+          });
+          // 跳到客户端登录页 ty_todo
         }
         return Promise.resolve(response);
       } catch (e) {
         return Promise.reject(e);
       }
+    },
+
+    async afterLogin() {
+      // const userStore = useUserStoreWithOut();
+      // const asyncRouteStore = useAsyncRouteStoreWidthOut();
+      // const userInfo = await userStore.GetInfo();
+      // const routes = await asyncRouteStore.generateRoutes(userInfo);
+      // // 动态添加可访问路由表
+      // routes.forEach((item) => {
+      //   router.addRoute(item as unknown as RouteRecordRaw);
+      // });
+      //添加404
+      // const isErrorPage = router.getRoutes().findIndex((item) => item.name === ErrorPageRoute.name);
+      // if (isErrorPage === -1) {
+      //   router.addRoute(ErrorPageRoute as unknown as RouteRecordRaw);
+      // }
+      // const redirectPath = (from.query.redirect || to.path) as string;
+      // const redirect = decodeURIComponent(redirectPath);
+      // const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect };
+      // asyncRouteStore.setDynamicAddedRoute(true);
+      // next(nextData);
     },
 
     // 获取用户信息
@@ -109,6 +142,6 @@ export const useUserStore = defineStore({
 });
 
 // Need to be used outside the setup
-export function useUserStoreWidthOut() {
+export function useUserStoreWithOut() {
   return useUserStore(store);
 }

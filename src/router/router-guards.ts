@@ -1,6 +1,6 @@
 import type { RouteRecordRaw } from 'vue-router';
 import { isNavigationFailure, Router } from 'vue-router';
-import { useUserStoreWidthOut } from '@/store/modules/user';
+import { useUserStoreWithOut } from '@/store/modules/user';
 import { useAsyncRouteStoreWidthOut } from '@/store/modules/asyncRoute';
 import { ACCESS_TOKEN } from '@/store/mutation-types';
 import { storage } from '@/utils/Storage';
@@ -12,7 +12,7 @@ const LOGIN_PATH = PageEnum.BASE_LOGIN;
 const whitePathList = [LOGIN_PATH]; // no redirect whitelist
 
 export function createRouterGuards(router: Router) {
-  const userStore = useUserStoreWidthOut();
+  const userStore = useUserStoreWithOut();
   const asyncRouteStore = useAsyncRouteStoreWidthOut();
   router.beforeEach(async (to, from, next) => {
     const Loading = window['$loading'] || null;
@@ -31,24 +31,28 @@ export function createRouterGuards(router: Router) {
     const token = storage.get(ACCESS_TOKEN);
 
     if (!token) {
+      // 尝试直接登录，如果登录失败则跳到客户端登录页，如果登录成功，跳到dashboard
+      asyncRouteStore.setDynamicAddedRoute(false);
+      await userStore.login();
       // You can access without permissions. You need to set the routing meta.ignoreAuth to true
-      if (to.meta.ignoreAuth) {
-        next();
-        return;
-      }
-      // redirect login page
-      const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
-        path: LOGIN_PATH,
-        replace: true,
-      };
-      if (to.path) {
-        redirectData.query = {
-          ...redirectData.query,
-          redirect: to.path,
-        };
-      }
-      next(redirectData);
-      return;
+      // if (to.meta.ignoreAuth) {
+      //   next();
+      //   return;
+      // }
+      // // redirect login page
+      // const redirectData: { path: string; replace: boolean; query?: Recordable<string> } = {
+      //   path: LOGIN_PATH,
+      //   replace: true,
+      // };
+      // if (to.path) {
+      //   redirectData.query = {
+      //     ...redirectData.query,
+      //     redirect: to.path,
+      //   };
+      // }
+      // next(redirectData);
+      // 直接跳客户端的登录
+      // return;
     }
 
     if (asyncRouteStore.getIsDynamicAddedRoute) {

@@ -25,12 +25,11 @@ export function getUserInfo() {
 /**
  * @description: 用户登录
  */
-export function login(params) {
+export function login() {
   return http.request<BasicResponseModel>(
     {
       url: '/login',
       method: 'POST',
-      params,
     },
     {
       isTransformResponse: false,

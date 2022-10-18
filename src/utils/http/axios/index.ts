@@ -15,7 +15,7 @@ import { setObjToUrlParams } from '@/utils/urlUtils';
 
 import { RequestOptions, Result, CreateAxiosOptions } from './types';
 
-import { useUserStoreWidthOut } from '@/store/modules/user';
+import { useUserStoreWithOut } from '@/store/modules/user';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix || '';
@@ -176,7 +176,7 @@ const transform: AxiosTransform = {
    */
   requestInterceptors: (config, options) => {
     // 请求之前处理config
-    const userStore = useUserStoreWidthOut();
+    const userStore = useUserStoreWithOut();
     const token = userStore.getToken;
     if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
       // jwt token

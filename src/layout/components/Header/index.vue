@@ -10,7 +10,7 @@
         <h2 v-show="!collapsed" class="title">{{ websiteConfig.title }}</h2>
       </div> -->
       <AsideMenu
-        v-model:collapsed="collapsed"
+        v-model:collapsed="getCollapsed"
         v-model:location="getMenuLocation"
         :inverted="getInverted"
         mode="horizontal"
@@ -72,7 +72,7 @@
       <div
         class="layout-header-trigger layout-header-trigger-min"
         v-for="item in iconList"
-        :key="item.icon.name"
+        :key="item.icon"
       >
         <n-tooltip placement="bottom">
           <template #trigger>
@@ -131,7 +131,6 @@
   import { NDialogProvider, useDialog, useMessage } from 'naive-ui';
   import { TABS_ROUTES } from '@/store/mutation-types';
   import { useUserStore } from '@/store/modules/user';
-  import { useLockscreenStore } from '@/store/modules/lockscreen';
   import ProjectSetting from './ProjectSetting.vue';
   import { AsideMenu } from '@/layout/components/Menu';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
@@ -150,7 +149,6 @@
     },
     setup(props) {
       const userStore = useUserStore();
-      const useLockscreen = useLockscreenStore();
       const message = useMessage();
       const dialog = useDialog();
       const { getNavMode, getNavTheme, getHeaderSetting, getMenuSetting, getCrumbsSetting } =
@@ -172,6 +170,10 @@
       const getInverted = computed(() => {
         const navTheme = unref(getNavTheme);
         return ['light', 'header-dark'].includes(navTheme) ? props.inverted : !props.inverted;
+      });
+
+      const getCollapsed = computed(() => {
+        return props.collapsed;
       });
 
       const mixMenu = computed(() => {
@@ -284,13 +286,6 @@
             click: () => window.open('https://github.com/jekip/naive-ui-admin'),
           },
         },
-        {
-          icon: 'LockOutlined',
-          tips: '锁屏',
-          eventObject: {
-            click: () => useLockscreen.setLock(true),
-          },
-        },
       ];
       const avatarOptions = [
         {
@@ -335,6 +330,7 @@
         drawerSetting,
         openSetting,
         getInverted,
+        getCollapsed,
         getMenuLocation,
         mixMenu,
         websiteConfig,
