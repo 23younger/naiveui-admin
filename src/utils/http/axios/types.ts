@@ -62,4 +62,6 @@ export interface Result<T = any> {
   type?: 'success' | 'error' | 'warning';
   message: string;
   result?: T;
+  msg: string;
+  data?: T;
 }

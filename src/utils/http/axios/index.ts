@@ -15,7 +15,7 @@ import { setObjToUrlParams } from '@/utils/urlUtils';
 
 import { RequestOptions, Result, CreateAxiosOptions } from './types';
 
-import { useUserStoreWithOut } from '@/store/modules/user';
+import { useUser } from '@/store/modules/user';
 
 const globSetting = useGlobSetting();
 const urlPrefix = globSetting.urlPrefix || '';
@@ -61,25 +61,25 @@ const transform: AxiosTransform = {
       throw new Error('请求出错，请稍候重试');
     }
     //  这里 code，result，message为 后台统一的字段，需要修改为项目自己的接口返回格式
-    const { code, result, message } = data;
+    const { code, data: rdata, msg } = data;
     // 请求成功
-    const hasSuccess = data && Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
+    const hasSuccess = Reflect.has(data, 'code') && code === ResultEnum.SUCCESS;
     // 是否显示提示信息
     if (isShowMessage) {
       if (hasSuccess && (successMessageText || isShowSuccessMessage)) {
         // 是否显示自定义信息提示
         $dialog.success({
           type: 'success',
-          content: successMessageText || message || '操作成功！',
+          content: successMessageText || msg || '操作成功！',
         });
       } else if (!hasSuccess && (errorMessageText || isShowErrorMessage)) {
         // 是否显示自定义信息提示
-        $message.error(message || errorMessageText || '操作失败！');
+        $message.error(msg || errorMessageText || '操作失败！');
       } else if (!hasSuccess && options.errorMessageMode === 'modal') {
         // errorMessageMode=‘custom-modal’的时候会显示modal错误弹窗，而不是消息提示，用于一些比较重要的错误
         $dialog.info({
           title: '提示',
-          content: message,
+          content: msg,
           positiveText: '确定',
           onPositiveClick: () => {},
         });
@@ -88,17 +88,17 @@ const transform: AxiosTransform = {
 
     // 接口请求成功，直接返回结果
     if (code === ResultEnum.SUCCESS) {
-      return result;
+      return rdata;
     }
     // 接口请求错误，统一提示错误信息 这里逻辑可以根据项目进行修改
-    let errorMsg = message;
+    let errorMsg = msg;
     switch (code) {
       // 请求失败
       case ResultEnum.ERROR:
         $message.error(errorMsg);
         break;
       // 登录超时
-      case ResultEnum.TIMEOUT:
+      case ResultEnum.TIMEOUT: // ty_todo 等待查询对应code值
         const LoginName = PageEnum.BASE_LOGIN_NAME;
         const LoginPath = PageEnum.BASE_LOGIN;
         if (router.currentRoute.value?.name === LoginName) return;
@@ -116,6 +116,22 @@ const transform: AxiosTransform = {
             window.location.href = LoginPath;
           },
           onNegativeClick: () => {},
+        });
+        break;
+      // 用户身份异常或未登录
+      case ResultEnum.USER_ERROR:
+        $message.error(errorMsg);
+        const fullPath = router.currentRoute.value.fullPath || '';
+        const userStore = useUser();
+        userStore.logout().then(() => {
+          router
+            .replace({
+              name: 'Login',
+              query: {
+                redirect: fullPath,
+              },
+            })
+            .finally(() => location.reload());
         });
         break;
     }
@@ -174,15 +190,18 @@ const transform: AxiosTransform = {
   /**
    * @description: 请求拦截器处理
    */
-  requestInterceptors: (config, options) => {
+  requestInterceptors: (config) => {
     // 请求之前处理config
-    const userStore = useUserStoreWithOut();
+    const userStore = useUser();
     const token = userStore.getToken;
+    const admUserId = userStore.getAdmUserId;
+    // ty_todo 看是否需要重置token值
     if (token && (config as Recordable)?.requestOptions?.withToken !== false) {
       // jwt token
-      (config as Recordable).headers.Authorization = options.authenticationScheme
-        ? `${options.authenticationScheme} ${token}`
-        : token;
+      (config as Recordable).headers.token = token;
+      if (admUserId) {
+        (config as Recordable).headers.admUserId = admUserId;
+      }
     }
     return config;
   },

@@ -1,10 +1,10 @@
-import type { Plugin } from 'vite';
+import type { Plugin,PluginOption } from 'vite';
 import Components from 'unplugin-vue-components/vite';
-import VueSetupExtend from 'vite-plugin-vue-setup-extend';
 import { NaiveUiResolver } from 'unplugin-vue-components/resolvers';
 
 import vue from '@vitejs/plugin-vue';
 import vueJsx from '@vitejs/plugin-vue-jsx';
+import VueSetupExtend from 'vite-plugin-vue-setup-extend';
 
 import { configHtmlPlugin } from './html';
 import { configMockPlugin } from './mock';
@@ -13,13 +13,12 @@ import { configCompressPlugin } from './compress';
 export function createVitePlugins(viteEnv: ViteEnv, isBuild: boolean, prodMock) {
   const { VITE_USE_MOCK, VITE_BUILD_COMPRESS, VITE_BUILD_COMPRESS_DELETE_ORIGIN_FILE } = viteEnv;
 
-  const vitePlugins: (Plugin | Plugin[])[] = [
+  const vitePlugins: (Plugin | Plugin[] | PluginOption[])[] = [
     // have to
     vue(),
     // have to
     vueJsx(),
-
-    // setup扩展
+    // 添加setup语法糖添加组件名
     VueSetupExtend(),
 
     // 按需引入NaiveUi且自动创建组件声明

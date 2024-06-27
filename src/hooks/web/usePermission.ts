@@ -7,10 +7,9 @@ export function usePermission() {
    * 检查权限
    * @param accesses
    */
-  function _somePermissions(accesses: string[]) {
+  function _somePermissions(accesses: any[]) {
     return userStore.getPermissions.some((item) => {
-      const { value }: any = item;
-      return accesses.includes(value);
+      return accesses.includes(item);
     });
   }
 

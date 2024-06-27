@@ -7,6 +7,7 @@ import { ActionItem } from '@/components/Table';
 import { renderEditCell } from '../components/editable';
 import { NTooltip, NIcon } from 'naive-ui';
 import { FormOutlined } from '@vicons/antd';
+import { useProjectSettingStore } from '@/store/modules/projectSetting';
 
 export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
   const columnsRef = ref(unref(propsRef).columns) as unknown as Ref<BasicColumn[]>;
@@ -89,9 +90,14 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
     }
   );
 
+  const settingStore = useProjectSettingStore();
+
   function handleActionColumn(propsRef: ComputedRef<BasicTableProps>, columns: BasicColumn[]) {
     const { actionColumn } = unref(propsRef);
     if (!actionColumn) return;
+    if (settingStore.getIsMobile) {
+      actionColumn.fixed = '';
+    }
     !columns.find((col) => col.key === 'action') &&
       columns.push({
         ...(actionColumn as any),

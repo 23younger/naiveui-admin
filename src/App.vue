@@ -31,6 +31,7 @@
         primaryColor: appTheme,
         primaryColorHover: lightenStr,
         primaryColorPressed: lightenStr,
+        primaryColorSuppl: appTheme,
       },
       LoadingBar: {
         colorLoading: appTheme,
@@ -40,7 +41,3 @@
 
   const getDarkTheme = computed(() => (designStore.darkTheme ? darkTheme : undefined));
 </script>
-
-<style lang="less">
-  @import 'styles/index.less';
-</style>

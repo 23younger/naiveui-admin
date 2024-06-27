@@ -2,8 +2,8 @@ import { http } from '@/utils/http/axios';
 
 export interface BasicResponseModel<T = any> {
   code: number;
-  message: string;
-  result: T;
+  msg: string;
+  data: T;
 }
 
 export interface BasicPageParams {
@@ -25,25 +25,10 @@ export function getUserInfo() {
 /**
  * @description: 用户登录
  */
-export function login() {
+export function login(params) {
   return http.request<BasicResponseModel>(
     {
-      url: '/login',
-      method: 'POST',
-    },
-    {
-      isTransformResponse: false,
-    }
-  );
-}
-
-/**
- * @description: 用户修改密码
- */
-export function changePassword(params, uid) {
-  return http.request(
-    {
-      url: `/user/u${uid}/changepw`,
+      url: '/adm/account/adminLogin/V2',
       method: 'POST',
       params,
     },
@@ -54,11 +39,47 @@ export function changePassword(params, uid) {
 }
 
 /**
- * @description: 用户登出
+ * @description: 验证用户是否存在
  */
-export function logout(params) {
+export function checkLoginNameApi(username) {
   return http.request({
-    url: '/login/logout',
+    url: '/adm/account/checkLoginName/' + username,
+    method: 'POST',
+  });
+}
+
+/**
+ * @description: 获取验证码
+ */
+export function getVerifyCodeApi() {
+  return http.request({
+    url: '/adm/account/verificationCode',
+    method: 'POST',
+  });
+}
+
+/**
+ * @description: sms用户登录
+ */
+export function smsLogin(params) {
+  return http.request<BasicResponseModel>(
+    {
+      url: '/adm/account/verifySmsLogin',
+      method: 'POST',
+      params,
+    },
+    {
+      isTransformResponse: false,
+    }
+  );
+}
+
+/**
+ * @description: 发送短信验证码
+ */
+export function sendVerifySmsApi(params) {
+  return http.request<BasicResponseModel>({
+    url: '/adm/account/sendVerifySms',
     method: 'POST',
     params,
   });

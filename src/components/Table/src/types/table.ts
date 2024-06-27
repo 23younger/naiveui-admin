@@ -1,6 +1,6 @@
-import type { TableBaseColumn } from 'naive-ui/lib/data-table/src/interface';
+import type { InternalRowData, TableBaseColumn } from 'naive-ui/lib/data-table/src/interface';
 import { ComponentType } from './componentType';
-export interface BasicColumn extends TableBaseColumn {
+export interface BasicColumn<T = InternalRowData> extends TableBaseColumn<T> {
   //编辑表格
   edit?: boolean;
   editRow?: boolean;
@@ -31,7 +31,7 @@ export interface BasicTableProps {
   columns: any[];
   pagination: object;
   showPagination: boolean;
-  actionColumn: any[];
+  actionColumn: any;
   canResize: boolean;
   resizeHeightOffset: number;
   loading: boolean;

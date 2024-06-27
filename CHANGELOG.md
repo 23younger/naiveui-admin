@@ -1,11 +1,43 @@
 # CHANGELOG
 
+- 依赖升级
+
+## 1.9.1
+
+- 优化 `typeSctipt` 类型定义
+- 优化 `setup` 语法
+- 依赖升级
+
+## 1.9.0
+
+- 新增 `BasicForm` 组件，支持 `setLoading`, `setSchema` 方法
+- 新增 `countField` 总数字段名配置
+- 优化 `yarn` 切换至 `pnpm`
+- 优化 `BasicForm` 组件，验证返回值
+- 优化 `BasicTable` 组件
+- 修复 `TableAction组件，左右间隔不生效` 关闭[253](https://github.com/jekip/naive-ui-admin/issues/253)
+- 修复 `BasicTable组件没有数据会一直请求接口` 关闭[#251](https://github.com/jekip/naive-ui-admin/issues/251)
+- 修复 `useModal+useForm组件的bug` 关闭[#250](https://github.com/jekip/naive-ui-admin/issues/250)
+- 修复 `手机端侧边导航风格不一致bug` 关闭[#247](https://github.com/jekip/naive-ui-admin/issues/247
+- 移除 `yarn.lock` 文件
+- 依赖升级
+
+## 1.8.2
+
+- ### ✨ Features
+- 新增 `directive` 示例
+- 依赖升级
+
+### 🐛 Bug Fixes
+- 修复 `样式异常` 图片
+
 ## 1.8.1
 
 - ### ✨ Features
 - 新增 `clean:cache` 删除缓存命令
 - 新增 `clean:lib` 删除 `node_modules` 命令
 - 依赖升级
+
 ### 🐛 Bug Fixes
 - 修复 `开发环境` 运行控制台错误提示
 

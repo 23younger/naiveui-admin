@@ -1,18 +1,26 @@
 <template>
   <RouterView>
     <template #default="{ Component, route }">
-      <transition :name="getTransitionName" mode="out-in" appear>
-        <keep-alive v-if="keepAliveComponents" :include="'BasicList'">
-          <component :is="Component" :key="route.name" />
+      <template v-if="mode === 'production'">
+        <transition :name="getTransitionName" mode="out-in" appear>
+          <keep-alive v-if="keepAliveComponents.length" :include="keepAliveComponents">
+            <component :is="Component" :key="route.fullPath" />
+          </keep-alive>
+          <component v-else :is="Component" :key="route.fullPath" />
+        </transition>
+      </template>
+      <template v-else>
+        <keep-alive v-if="keepAliveComponents.length" :include="keepAliveComponents">
+          <component :is="Component" :key="route.fullPath" />
         </keep-alive>
         <component v-else :is="Component" :key="route.fullPath" />
-      </transition>
+      </template>
     </template>
   </RouterView>
 </template>
 
 <script>
-  import { defineComponent, computed, unref, watch } from 'vue';
+  import { defineComponent, computed, unref } from 'vue';
   import { useAsyncRouteStore } from '@/store/modules/asyncRoute';
   import { useProjectSetting } from '@/hooks/setting/useProjectSetting';
 
@@ -30,22 +38,20 @@
       },
     },
     setup() {
-      const { getIsPageAnimate, getPageAnimateType } = useProjectSetting();
+      const { isPageAnimate, pageAnimateType } = useProjectSetting();
       const asyncRouteStore = useAsyncRouteStore();
       // 需要缓存的路由组件
       const keepAliveComponents = computed(() => asyncRouteStore.keepAliveComponents);
 
-      watch(asyncRouteStore.keepAliveComponents, (newval) => {
-        console.log('newval', newval);
-      });
-
       const getTransitionName = computed(() => {
-        return unref(getIsPageAnimate) ? unref(getPageAnimateType) : '';
+        return unref(isPageAnimate) ? unref(pageAnimateType) : '';
       });
 
+      const mode = import.meta.env.MODE;
       return {
         keepAliveComponents,
         getTransitionName,
+        mode,
       };
     },
   });

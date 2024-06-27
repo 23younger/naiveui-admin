@@ -1,10 +1,26 @@
 import { defineStore } from 'pinia';
 import { store } from '@/store';
-import { ACCESS_TOKEN, CURRENT_USER, IS_LOCKSCREEN } from '@/store/mutation-types';
+import {
+  CURRENT_USER,
+  NEWTOKEN,
+  ADMUSERID,
+  ROLEID,
+  LOGINNAME,
+  ROLENAME,
+  MS_USERNAME,
+  ACCESS,
+} from '@/store/mutation-types';
 import { ResultEnum } from '@/enums/httpEnum';
-// import { useAsyncRouteStoreWidthOut } from '@/store/modules/asyncRoute;
-import { getUserInfo, login } from '@/api/system/user';
+
+import { getUserInfo as getUserInfoApi, login, smsLogin } from '@/api/system/user';
 import { storage } from '@/utils/Storage';
+
+// export type UserInfoType = {
+//   // TODO: add your own data
+//   name: string;
+//   username: string;
+//   email: string;
+// };
 
 export interface IUserState {
   token: string;
@@ -13,17 +29,21 @@ export interface IUserState {
   avatar: string;
   permissions: any[];
   info: any;
+  admUserId: string;
+  access: string;
 }
 
 export const useUserStore = defineStore({
   id: 'app-user',
   state: (): IUserState => ({
-    token: storage.get(ACCESS_TOKEN, ''),
+    token: storage.get(NEWTOKEN, ''),
     username: '',
     welcome: '',
     avatar: '',
     permissions: [],
     info: storage.get(CURRENT_USER, {}),
+    admUserId: storage.get(ADMUSERID, ''),
+    access: storage.get(ACCESS, ''),
   }),
   getters: {
     getToken(): string {
@@ -38,8 +58,11 @@ export const useUserStore = defineStore({
     getPermissions(): [any][] {
       return this.permissions;
     },
-    getUserInfo(): object {
+    getUserInfo(): any {
       return this.info;
+    },
+    getAdmUserId(): any {
+      return this.admUserId;
     },
   },
   actions: {
@@ -52,96 +75,58 @@ export const useUserStore = defineStore({
     setPermissions(permissions) {
       this.permissions = permissions;
     },
-    setUserInfo(info) {
+    setUserInfo(info: any) {
       this.info = info;
     },
-    // 登录
-    async login() {
-      try {
-        const response = await login();
-        const { result, code } = response;
-        if (code === ResultEnum.SUCCESS) {
-          const ex = 7 * 24 * 60 * 60 * 1000;
-          storage.set(ACCESS_TOKEN, result.token, ex);
-          storage.set(CURRENT_USER, result, ex);
-          storage.set(IS_LOCKSCREEN, false);
-          this.setToken(result.token);
-          this.setUserInfo(result);
-          window['$notification'].success({
-            content: '登录成功！',
-            meta: `欢迎${result.name}`,
-            duration: 2500,
-          });
-        } else {
-          window['$notification'].error({
-            content: '登录失败',
-            meta: `欢迎${result.name}`,
-            duration: 2500,
-          });
-          // 跳到客户端登录页 ty_todo
-        }
-        return Promise.resolve(response);
-      } catch (e) {
-        return Promise.reject(e);
+    // 登录 loginType 2-sms登录 其他-普通登录
+    async login(params: any, loginType?) {
+      const fetchFn = loginType === 2 ? smsLogin : login;
+      const response = await fetchFn(params);
+      const { data, code } = response;
+      if (code === ResultEnum.SUCCESS || code === 3) {
+        // code：3-引导去密码修改页面
+        storage.set(NEWTOKEN, data.token);
+        storage.set(CURRENT_USER, data);
+        storage.set(ADMUSERID, data.admUserId);
+        storage.set(ROLEID, data.roleId);
+        storage.set(LOGINNAME, data.loginName);
+        storage.set(ROLENAME, data.roleName);
+        storage.set(MS_USERNAME, params.username);
+        storage.set(ACCESS, data.userModule);
+        this.setToken(data.token);
+        this.setUserInfo(data);
+        this.setPermissions(data.userModule);
       }
-    },
-
-    async afterLogin() {
-      // const userStore = useUserStoreWithOut();
-      // const asyncRouteStore = useAsyncRouteStoreWidthOut();
-      // const userInfo = await userStore.GetInfo();
-      // const routes = await asyncRouteStore.generateRoutes(userInfo);
-      // // 动态添加可访问路由表
-      // routes.forEach((item) => {
-      //   router.addRoute(item as unknown as RouteRecordRaw);
-      // });
-      //添加404
-      // const isErrorPage = router.getRoutes().findIndex((item) => item.name === ErrorPageRoute.name);
-      // if (isErrorPage === -1) {
-      //   router.addRoute(ErrorPageRoute as unknown as RouteRecordRaw);
-      // }
-      // const redirectPath = (from.query.redirect || to.path) as string;
-      // const redirect = decodeURIComponent(redirectPath);
-      // const nextData = to.path === redirect ? { ...to, replace: true } : { path: redirect };
-      // asyncRouteStore.setDynamicAddedRoute(true);
-      // next(nextData);
+      console.log('response...', response);
+      return response;
     },
 
     // 获取用户信息
-    GetInfo() {
-      const that = this;
-      return new Promise((resolve, reject) => {
-        getUserInfo()
-          .then((res) => {
-            const result = res;
-            if (result.permissions && result.permissions.length) {
-              const permissionsList = result.permissions;
-              that.setPermissions(permissionsList);
-              that.setUserInfo(result);
-            } else {
-              reject(new Error('getInfo: permissionsList must be a non-null array !'));
-            }
-            that.setAvatar(result.avatar);
-            resolve(res);
-          })
-          .catch((error) => {
-            reject(error);
-          });
-      });
+    async getInfo() {
+      // ty_todo 暂时抛弃该方法，用户信息修改需退出登录重新进入
+      const result = await getUserInfoApi();
+      if (result.permissions && result.permissions.length) {
+        const permissionsList = result.permissions;
+        this.setPermissions(permissionsList);
+        this.setUserInfo(result);
+      } else {
+        throw new Error('getInfo: permissionsList must be a non-null array !');
+      }
+      this.setAvatar(result.avatar);
+      return result;
     },
 
     // 登出
     async logout() {
+      this.setToken('');
       this.setPermissions([]);
-      this.setUserInfo('');
-      storage.remove(ACCESS_TOKEN);
-      storage.remove(CURRENT_USER);
-      return Promise.resolve('');
+      this.setUserInfo({ name: '', username: '', email: '' });
+      storage.clear();
     },
   },
 });
 
 // Need to be used outside the setup
-export function useUserStoreWithOut() {
+export function useUser() {
   return useUserStore(store);
 }

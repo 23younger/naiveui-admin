@@ -1,6 +1,6 @@
 const setting = {
   //导航模式 vertical 左侧菜单模式 horizontal 顶部菜单模式
-  navMode: 'horizontal',
+  navMode: 'vertical',
   //导航风格 dark 暗色侧边栏 light 白色侧边栏 header-dark 暗色顶栏
   navTheme: 'dark',
   // 是否处于移动端模式
@@ -48,7 +48,7 @@ const setting = {
     showIcon: false,
   },
   //菜单权限模式 FIXED 前端固定路由  BACK 动态获取
-  permissionMode: 'BACK',
+  permissionMode: 'FIXED',
   //是否开启路由动画
   isPageAnimate: true,
   //路由动画类型
