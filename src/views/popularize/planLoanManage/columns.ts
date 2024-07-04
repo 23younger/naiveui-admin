@@ -1,0 +1,276 @@
+import { h } from 'vue';
+import { NIcon, NSwitch, NTooltip } from 'naive-ui';
+import { InfoCircleOutlined } from '@vicons/antd';
+import { BasicColumnWithSelection } from '@/components/Table';
+import {
+  postXdPlanSwitch,
+  planInvalidFn,
+  UpdatePlanBasicInfo,
+} from '@/api/popularize/planLoanManage';
+import { dayLIst } from '@/utils/dateUtil';
+
+// 推广开关
+const statusChange = async (value, row) => {
+  if (!row.weight) return window['$message'].error('请先设置权重');
+  await postXdPlanSwitch({
+    id: row.id,
+    status: value ? 1 : 0,
+  });
+  row.status = value ? 1 : 0;
+};
+
+export const columns: BasicColumnWithSelection = [
+  {
+    key: 't_selection',
+    type: 'selection',
+  },
+  {
+    title: '推广开关',
+    key: 'status',
+    width: 100,
+    align: 'center',
+    render(row) {
+      return h(NSwitch, {
+        value: row.status,
+        checkedValue: 1,
+        uncheckedValue: 0,
+        onUpdateValue: (val) => {
+          statusChange(val, row);
+        },
+      });
+    },
+  },
+  {
+    title: '有效状态',
+    key: 'runStatus',
+    width: 100,
+    align: 'center',
+    render(row) {
+      return h(
+        'div',
+        {},
+        row.runStatus === 0
+          ? [
+              h('span', {}, '无效'),
+              h(
+                NTooltip,
+                { trigger: 'click' },
+                {
+                  trigger: () =>
+                    h(
+                      NIcon,
+                      {
+                        size: 18,
+                        onClick: () => {
+                          planInvalidFn(row)
+                            .then((data) => {
+                              if (data && data.listInvalid && data.listInvalid.length) {
+                                const list = data.listInvalid;
+                                let str = '';
+                                list.forEach((item) => {
+                                  str = str + item + '、';
+                                });
+                                row.runStatusInfo = str.slice(0, -1);
+                                return;
+                              }
+                              row.runStatusInfo = '';
+                            })
+                            .catch(() => {
+                              row.runStatusInfo = '加载失败';
+                            });
+                        },
+                      },
+                      {
+                        default: () => h(InfoCircleOutlined),
+                      }
+                    ),
+                  default: () => {
+                    return row.runStatusInfo ?? '';
+                  },
+                }
+              ),
+            ]
+          : '有效'
+      );
+    },
+  },
+  {
+    title: '推广ID',
+    key: 'id',
+    align: 'center',
+    width: 100,
+  },
+  {
+    title: '推广名称',
+    key: 'name',
+    align: 'center',
+    ellipsis: false,
+    width: 150,
+  },
+  {
+    title: '公司名称',
+    key: 'companyName',
+    align: 'center',
+    ellipsis: false,
+    width: 150,
+  },
+  {
+    title: '投放区域',
+    key: 'range',
+    align: 'center',
+    width: 100,
+    ellipsis: false,
+    render(row) {
+      return h('div', {}, [
+        h(
+          NTooltip,
+          { trigger: 'click' },
+          {
+            trigger: () =>
+              h(
+                'span',
+                {
+                  style: {
+                    display: '-webkit-box',
+                    '-webkit-line-clamp': '2',
+                    '-webkit-box-orient': 'vertical',
+                    overflow: 'hidden',
+                    cursor: 'pointer',
+                  },
+                },
+                row.range == 0 ? '全国' : row.cityName
+              ),
+            default: () => {
+              return row.range == 0 ? '全国' : row.cityName;
+            },
+          }
+        ),
+      ]);
+    },
+  },
+  {
+    title: '每日最高推广金额(元)',
+    key: 'applyAmountDelivered',
+    align: 'center',
+    width: 180,
+    render: (row) =>
+      row.applyAmountDelivered || row.applyAmountDelivered == 0
+        ? row.applyAmountDelivered.toFixed(2)
+        : '',
+  },
+  {
+    title: 'arpu(元)',
+    key: 'arpu',
+    align: 'center',
+    width: 140,
+    render: (row) => (row.arpu || row.arpu == 0 ? row.arpu.toFixed(2) : ''),
+  },
+  {
+    title: '推广日期',
+    key: 'days',
+    align: 'center',
+    width: 120,
+    ellipsis: false,
+    render: (row) =>
+      row.days
+        ? // 这里需要将0-6分别展示星期一到星期天
+          dayLIst(row.days)
+        : '-',
+  },
+  {
+    title: '推广时间段',
+    key: 'planTimeList',
+    align: 'center',
+    width: 140,
+    render: (row) => (row.planTimeList ? row.planTimeList.join(',') : '-'),
+  },
+  {
+    title: '今日消耗数量',
+    key: 'dayApplyNum',
+    align: 'center',
+    width: 140,
+    sorter: true,
+  },
+  {
+    title: '权重',
+    key: 'weight',
+    align: 'center',
+    width: 100,
+    sorter: true,
+  },
+  {
+    title: '推广出价',
+    key: 'price',
+    align: 'center',
+    width: 180,
+    sorter: true,
+    edit: true,
+    editable: false,
+    editComponent: 'NInput',
+    editRule: async (text) => {
+      if (/(^\d+$)|(^\d+\.\d{0,2}?$)/.test(text)) {
+        return '';
+      }
+      return '请输入整数或两位小数';
+    },
+    editValueMap(value) {
+      return value || value == 0 ? Number(value).toFixed(2) : '';
+    },
+    editComponentProps: {
+      onkeyup: (e) => {
+        e.target.value = e.target.value.replace(/[^\d.]*/g, '');
+      },
+    },
+    editSuccessCallback: async (record, dataKey, value) => {
+      const data = {
+        id: record.id,
+        [dataKey]: value,
+      };
+      await UpdatePlanBasicInfo(data);
+      window['$message'].success('修改成功');
+    },
+  },
+  {
+    title: '今日消耗金额(元)',
+    key: 'dailyConsAmount',
+    align: 'center',
+    width: 160,
+    render: (row) =>
+      row.dailyConsAmount || row.dailyConsAmount == 0 ? row.dailyConsAmount.toFixed(2) : '',
+  },
+  {
+    title: '总消耗金额(元)',
+    key: 'totalConsAmount',
+    align: 'center',
+    width: 150,
+    render: (row) =>
+      row.totalConsAmount || row.totalConsAmount == 0 ? row.totalConsAmount.toFixed(2) : '',
+  },
+  {
+    title: '所需条件',
+    key: 'busiAccess',
+    align: 'center',
+    width: 150,
+    ellipsis: false,
+  },
+  {
+    title: '创建人',
+    key: 'createBy',
+    align: 'center',
+    width: 120,
+  },
+  {
+    title: '创建时间',
+    key: 'createTime',
+    align: 'center',
+    width: 120,
+    ellipsis: false,
+  },
+  {
+    title: '最后修改时间',
+    key: 'updateTime',
+    align: 'center',
+    width: 120,
+    ellipsis: false,
+  },
+];

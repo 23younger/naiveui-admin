@@ -40,7 +40,7 @@ export const useUserStore = defineStore({
     username: '',
     welcome: '',
     avatar: '',
-    permissions: [],
+    permissions: storage.get(ACCESS, []),
     info: storage.get(CURRENT_USER, {}),
     admUserId: storage.get(ADMUSERID, ''),
     access: storage.get(ACCESS, ''),
@@ -97,7 +97,6 @@ export const useUserStore = defineStore({
         this.setUserInfo(data);
         this.setPermissions(data.userModule);
       }
-      console.log('response...', response);
       return response;
     },
 

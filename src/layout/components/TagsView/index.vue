@@ -241,16 +241,18 @@
 
       // 将最新的路由信息同步到 localStorage 中
       const routes = router.getRoutes();
+      const initCacheRoutes: RouteItem[] = [];
       cacheRoutes.forEach((cacheRoute) => {
         const route = routes.find((route) => route.path === cacheRoute.path);
         if (route) {
           cacheRoute.meta = route.meta || cacheRoute.meta;
           cacheRoute.name = (route.name || cacheRoute.name) as string;
+          initCacheRoutes.push(cacheRoute);
         }
       });
 
       // 初始化标签页
-      tabsViewStore.initTabs(cacheRoutes);
+      tabsViewStore.initTabs(initCacheRoutes);
 
       //监听滚动条
       function onScroll(e) {

@@ -41,7 +41,7 @@
         </n-icon>
       </div>
       <!-- 面包屑 -->
-      <n-breadcrumb v-if="crumbsSetting.show">
+      <n-breadcrumb v-if="crumbsSetting.show && !isMobile">
         <template
           v-for="routeItem in breadcrumbList"
           :key="routeItem.name === 'Redirect' ? void 0 : routeItem.name"
@@ -73,7 +73,7 @@
     </div>
     <div class="layout-header-right">
       <!--切换全屏-->
-      <div class="layout-header-trigger layout-header-trigger-min">
+      <div class="layout-header-trigger layout-header-trigger-min" v-if="!isMobile">
         <n-tooltip placement="bottom">
           <template #trigger>
             <n-icon size="18">
@@ -128,7 +128,8 @@
       const userStore = useUserStore();
       const message = useMessage();
       const dialog = useDialog();
-      const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting } = useProjectSetting();
+      const { navMode, navTheme, headerSetting, menuSetting, crumbsSetting, isMobile } =
+        useProjectSetting();
 
       const state = reactive({
         username: userStore?.info?.loginName ?? '',
@@ -278,6 +279,7 @@
         mixMenu,
         websiteConfig,
         handleMenuCollapsed,
+        isMobile,
       };
     },
   });

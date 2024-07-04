@@ -1,12 +1,6 @@
 <template>
   <div class="editable-cell">
-    <div v-show="!isEdit" class="editable-cell-content" @click="handleEdit">
-      {{ getValues }}
-      <n-icon class="edit-icon" v-if="!column.editRow">
-        <FormOutlined />
-      </n-icon>
-    </div>
-    <div class="flex editable-cell-content" v-show="isEdit" v-click-outside="onClickOutside">
+    <div class="flex editable-cell-content" v-if="isEdit" v-click-outside="onClickOutside">
       <div class="editable-cell-content-comp">
         <CellComponent
           v-bind="getComponentProps"
@@ -28,6 +22,12 @@
           <CloseOutlined @click="handleCancel" />
         </n-icon>
       </div>
+    </div>
+    <div v-else class="flex items-center editable-cell-content" @click="handleEdit">
+      {{ getValues }}
+      <n-icon class="ml-1 edit-icon" v-if="!column.editRow">
+        <FormOutlined />
+      </n-icon>
     </div>
   </div>
 </template>
@@ -124,6 +124,8 @@
               value = value.map((item) => parseISO(item).getTime());
             }
           }
+        } else if (component === 'NInput') {
+          value = isNumber(value) ? String(value) : value;
         }
 
         const onEvent: any = editComponent ? EventEnum[editComponent] : undefined;
@@ -263,12 +265,20 @@
 
         const { column, index, record } = props;
         if (!record) return false;
-        const { key } = column;
+        const { key, editSuccessCallback } = column;
         const value = unref(currentValueRef);
         if (!key) return;
 
         const dataKey = key as string;
 
+        // 处理编辑成功逻辑
+        if (editSuccessCallback) {
+          try {
+            await editSuccessCallback(record, dataKey, value);
+          } catch (error) {
+            return;
+          }
+        }
         set(record, dataKey, value);
         //const record = await table.updateTableData(index, dataKey, value);
         needEmit && table.emit?.('edit-end', { record, index, key, value });

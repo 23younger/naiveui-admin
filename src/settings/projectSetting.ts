@@ -4,7 +4,7 @@ const setting = {
   //导航风格 dark 暗色侧边栏 light 白色侧边栏 header-dark 暗色顶栏
   navTheme: 'dark',
   // 是否处于移动端模式
-  isMobile: false,
+  isMobile: true,
   //顶部
   headerSetting: {
     //背景色

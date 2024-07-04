@@ -1,4 +1,5 @@
 import { upperFirst } from 'lodash-es';
+import setting from '@/settings/projectSetting';
 
 export interface ViewportOffsetResult {
   left: number;
@@ -163,3 +164,11 @@ export function once(el: HTMLElement, event: string, fn: EventListener): void {
   };
   on(el, event, listener);
 }
+
+/* 通过屏幕宽度判断是否移动端 */
+export const checkMobileMode = () => {
+  if (document.body.clientWidth <= setting.menuSetting.mobileWidth) {
+    return true;
+  }
+  return false;
+};

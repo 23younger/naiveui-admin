@@ -6,21 +6,28 @@ import type { ButtonProps } from 'naive-ui/lib/button';
 export interface FormSchema {
   field: string;
   label: string;
+  labelWidth?: number | string;
+  labelStyle?: CSSProperties | string | undefined;
   labelMessage?: string;
   labelMessageStyle?: object | string;
   defaultValue?: any;
   component?: ComponentType;
-  componentProps?: object;
+  componentProps?:
+    | Recordable
+    | ((opt: { formActionType: FormActionType; formModel: Recordable }) => Recordable);
   slot?: string;
   rules?: object | object[];
   giProps?: GridItemProps;
   isFull?: boolean;
   suffix?: string;
+  showRequireMark?: boolean;
+  showFeedback?: boolean;
 }
 
 export interface FormProps {
   model?: Recordable;
   labelWidth?: number | string;
+  labelStyle?: CSSProperties | string | undefined;
   schemas?: FormSchema[];
   inline: boolean;
   layout?: string;
@@ -47,7 +54,9 @@ export interface FormProps {
 export interface FormActionType {
   submit: () => Promise<any>;
   setProps: (formProps: Partial<FormProps>) => Promise<void>;
-  setSchema: (schemaProps: Partial<FormSchema[]>) => Promise<void>;
+  setSchema: (
+    schemaProps: Partial<FormSchema> | Partial<FormSchema>[]
+  ) => Promise<void> | undefined;
   setFieldsValue: (values: Recordable) => void;
   clearValidate: (name?: string | string[]) => Promise<void>;
   getFieldsValue: () => Recordable;

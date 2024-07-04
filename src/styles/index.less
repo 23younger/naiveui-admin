@@ -1,1 +1,22 @@
 @import url('./transition/index.less');
+
+// 处理移动端pagination样式
+@media screen and (max-width: 800px) {
+  .n-data-table .n-data-table__pagination {
+    display: flex !important;
+    justify-content: flex-start !important;
+    overflow-x: auto;
+    padding-bottom: 6px;
+  }
+  .n-pagination .n-pagination-prefix {
+    white-space: nowrap;
+  }
+}
+
+.ellipsis-2 {
+  display: '-webkit-box' !important;
+  -webkit-line-clamp: '2' !important;
+  -webkit-box-orient: 'vertical' !important;
+  overflow: 'hidden' !important;
+  cursor: 'pointer' !important;
+}

@@ -2,7 +2,13 @@
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <n-grid v-bind="getGrid">
       <n-gi v-bind="schema.giProps" v-for="schema in getSchema" :key="schema.field">
-        <n-form-item :label="schema.label" :path="schema.field">
+        <n-form-item
+          v-bind="schema"
+          :label="schema.label"
+          :path="schema.field"
+          :labelWidth="schema.labelWidth || getProps.labelWidth"
+          :labelStyle="schema.labelStyle || getProps.labelStyle"
+        >
           <!--标签名右侧温馨提示-->
           <template #label v-if="schema.labelMessage">
             {{ schema.label }}
@@ -31,7 +37,7 @@
             <n-checkbox-group v-model:value="formModel[schema.field]">
               <n-space>
                 <n-checkbox
-                  v-for="item in schema.componentProps.options"
+                  v-for="item in getComponentProps(schema).options"
                   :key="item.value"
                   :value="item.value"
                   :label="item.label"
@@ -45,7 +51,7 @@
             <n-radio-group v-model:value="formModel[schema.field]">
               <n-space>
                 <n-radio
-                  v-for="item in schema.componentProps.options"
+                  v-for="item in getComponentProps(schema).options"
                   :key="item.value"
                   :value="item.value"
                 >
@@ -54,6 +60,9 @@
               </n-space>
             </n-radio-group>
           </template>
+
+          <!-- ty_todo 添加自定义组件 -->
+
           <!--动态渲染表单组件-->
           <component
             v-else
@@ -135,8 +144,12 @@
   import type { GridProps } from 'naive-ui/lib/grid';
   import type { FormSchema, FormProps, FormActionType } from './types/form';
 
-  import { isArray } from '@/utils/is/index';
+  import { isArray, isFunction } from '@/utils/is/index';
   import { deepMerge } from '@/utils';
+
+  import { checkMobileMode } from '@/utils/domUtils';
+
+  const isMobile = checkMobileMode();
 
   export default defineComponent({
     name: 'BasicForm',
@@ -151,7 +164,7 @@
       const propsRef = ref<Partial<FormProps>>({});
       const schemaRef = ref<Nullable<FormSchema[]>>(null);
       const formElRef = ref<Nullable<FormActionType>>(null);
-      const gridCollapsed = ref(true);
+      const gridCollapsed = ref(isMobile);
       const loadingSub = ref(false);
       const isUpdateDefaultRef = ref(false);
 
@@ -175,8 +188,15 @@
         );
       });
 
-      function getComponentProps(schema) {
-        const compProps = schema.componentProps ?? {};
+      function getComponentProps(schema): any {
+        let compProps = {};
+        if (schema.componentProps) {
+          if (isFunction(schema.componentProps)) {
+            compProps = schema.componentProps({ formActionType, formModel });
+          } else {
+            compProps = schema.componentProps;
+          }
+        }
         const component = schema.component;
         return {
           clearable: true,
@@ -205,10 +225,10 @@
       });
 
       const getGrid = computed((): GridProps => {
-        const { gridProps } = unref(getProps);
+        const { gridProps, showActionButtonGroup } = unref(getProps);
         return {
           ...gridProps,
-          collapsed: isInline.value ? gridCollapsed.value : false,
+          collapsed: isInline.value ? (showActionButtonGroup ? gridCollapsed.value : false) : false,
           responsive: 'screen',
         };
       });
@@ -236,17 +256,26 @@
         formModel,
       });
 
-      const { handleSubmit, validate, resetFields, getFieldsValue, clearValidate, setFieldsValue } =
-        useFormEvents({
-          emit,
-          getProps,
-          formModel,
-          getSchema,
-          formElRef: formElRef as Ref<FormActionType>,
-          defaultFormModel,
-          loadingSub,
-          handleFormValues,
-        });
+      const {
+        handleSubmit,
+        validate,
+        resetFields,
+        getFieldsValue,
+        clearValidate,
+        setFieldsValue,
+        setLoading,
+        setSchema,
+      } = useFormEvents({
+        emit,
+        getProps,
+        formModel,
+        getSchema,
+        schemaRef,
+        formElRef: formElRef as Ref<FormActionType>,
+        defaultFormModel,
+        loadingSub,
+        handleFormValues,
+      });
 
       function unfoldToggle() {
         gridCollapsed.value = !gridCollapsed.value;
@@ -264,6 +293,8 @@
         clearValidate,
         setProps,
         submit: handleSubmit,
+        setLoading,
+        setSchema,
       };
 
       watch(

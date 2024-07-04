@@ -9,6 +9,11 @@ export const basicProps = {
     type: [Number, String] as PropType<number | string>,
     default: 80,
   },
+  // // 标签样式
+  // labelStyle: {
+  //   type: [CSSPropertyRule, undefined],
+  //   default: undefined,
+  // },
   // 表单配置规则
   schemas: {
     type: [Array] as PropType<FormSchema[]>,

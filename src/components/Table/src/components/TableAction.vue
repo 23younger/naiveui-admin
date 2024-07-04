@@ -1,8 +1,8 @@
 <template>
   <div class="tableAction">
-    <div class="flex items-center justify-center">
+    <div class="text-center">
       <template v-for="(action, index) in getActions" :key="`${index}-${action.label}`">
-        <n-button v-bind="action" class="mx-1">
+        <n-button v-bind="action" class="m-1">
           {{ action.label }}
           <template #icon v-if="action.hasOwnProperty('icon')">
             <n-icon :component="action.icon" />

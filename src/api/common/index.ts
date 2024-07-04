@@ -1,11 +1,9 @@
 import { http } from '@/utils/http/axios';
 
 //获取table
-export function getTableList(params) {
-  params.permissions = true;
+export function cityListApi() {
   return http.request({
-    url: '/plan/list',
+    url: '/other/all/city',
     method: 'post',
-    params,
   });
 }

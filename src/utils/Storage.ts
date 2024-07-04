@@ -27,7 +27,6 @@ export default class Storage {
    * @param expire
    */
   set(key: string, value: any, expire: number | null = DEFAULT_CACHE_TIME) {
-    console.log('expire。。。', key, value, expire);
     const stringData = JSON.stringify({
       value,
       expire: expire !== null ? new Date().getTime() + expire * 1000 : null,

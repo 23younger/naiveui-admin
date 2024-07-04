@@ -1,13 +1,15 @@
 import type { ComputedRef, Ref } from 'vue';
 import type { FormProps, FormSchema, FormActionType } from '../types/form';
 import { unref, toRaw } from 'vue';
-import { isFunction } from '@/utils/is';
+import { isArray, isFunction, isObject } from '@/utils/is';
+import { deepMerge } from '@/utils';
 
 declare type EmitType = (event: string, ...args: any[]) => void;
 
 interface UseFormActionContext {
   emit: EmitType;
   getProps: ComputedRef<FormProps>;
+  schemaRef: Ref<Nullable<FormSchema[]>>;
   getSchema: ComputedRef<FormSchema[]>;
   formModel: Recordable;
   formElRef: Ref<FormActionType>;
@@ -20,6 +22,7 @@ export function useFormEvents({
   emit,
   getProps,
   formModel,
+  schemaRef,
   getSchema,
   formElRef,
   defaultFormModel,
@@ -104,6 +107,37 @@ export function useFormEvents({
     loadingSub.value = value;
   }
 
+  // 设置schema，没有则添加，有则修改，无删除
+  function setSchema(data: Partial<FormSchema> | Partial<FormSchema>[]): Promise<void> | undefined {
+    let updateSchema: Partial<FormSchema>[] = [];
+    if (isObject(data)) {
+      updateSchema.push(data as FormSchema);
+    } else if (isArray(data)) {
+      updateSchema = [...data];
+    }
+
+    const hasField = updateSchema.every((item) => Reflect.has(item, 'field') && item.field);
+
+    if (!hasField) {
+      console.error('未找到匹配的表单项');
+      return;
+    }
+
+    const newSchema: FormSchema[] = [];
+    unref(getSchema).forEach((val) => {
+      const updateItem = updateSchema.find((v) => v.field === val.field);
+
+      if (updateItem) {
+        const newSchemaItem = deepMerge(val, updateItem);
+        newSchema.push(newSchemaItem);
+      } else {
+        newSchema.push(val);
+      }
+    });
+
+    schemaRef.value = newSchema;
+  }
+
   return {
     handleSubmit,
     validate,
@@ -112,5 +146,6 @@ export function useFormEvents({
     clearValidate,
     setFieldsValue,
     setLoading,
+    setSchema,
   };
 }

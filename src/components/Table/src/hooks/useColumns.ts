@@ -7,7 +7,7 @@ import { ActionItem } from '@/components/Table';
 import { renderEditCell } from '../components/editable';
 import { NTooltip, NIcon } from 'naive-ui';
 import { FormOutlined } from '@vicons/antd';
-import { useProjectSettingStore } from '@/store/modules/projectSetting';
+import { checkMobileMode } from '@/utils/domUtils';
 
 export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
   const columnsRef = ref(unref(propsRef).columns) as unknown as Ref<BasicColumn[]>;
@@ -15,7 +15,6 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
 
   const getColumnsRef = computed(() => {
     const columns = cloneDeep(unref(columnsRef));
-
     handleActionColumn(propsRef, columns);
     if (!columns) return [];
     return columns;
@@ -90,12 +89,10 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
     }
   );
 
-  const settingStore = useProjectSettingStore();
-
   function handleActionColumn(propsRef: ComputedRef<BasicTableProps>, columns: BasicColumn[]) {
     const { actionColumn } = unref(propsRef);
     if (!actionColumn) return;
-    if (settingStore.getIsMobile) {
+    if (checkMobileMode()) {
       actionColumn.fixed = '';
     }
     !columns.find((col) => col.key === 'action') &&
@@ -136,9 +133,13 @@ export function useColumns(propsRef: ComputedRef<BasicTableProps>) {
   //获取
   function getColumns(): BasicColumn[] {
     const columns = toRaw(unref(getColumnsRef));
-    return columns.map((item) => {
-      return { ...item, title: item.title, key: item.key, fixed: item.fixed || undefined };
-    });
+    return columns
+      .filter((column) => {
+        return hasPermission(column.auth as string[]) && isIfShow(column);
+      })
+      .map((item) => {
+        return { ...item, title: item.title, key: item.key, fixed: item.fixed || undefined };
+      });
   }
 
   //获取原始

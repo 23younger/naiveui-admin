@@ -18,7 +18,11 @@
           v-show="!showVerifySms"
         >
           <n-form-item path="username">
-            <n-input v-model:value.trim="formData.username" placeholder="请输入用户名">
+            <n-input
+              v-model:value.trim="formData.username"
+              placeholder="请输入用户名"
+              @keyup.enter="handleSubmit(1)"
+            >
               <template #prefix>
                 <n-icon size="18" color="#808695">
                   <PersonOutline />
@@ -32,6 +36,7 @@
               type="password"
               showPasswordOn="click"
               placeholder="请输入密码"
+              @keyup.enter="handleSubmit(1)"
             >
               <template #prefix>
                 <n-icon size="18" color="#808695">
@@ -41,7 +46,11 @@
             </n-input>
           </n-form-item>
           <n-form-item path="code">
-            <n-input v-model:value.trim="formData.code" placeholder="请输入验证码">
+            <n-input
+              v-model:value.trim="formData.code"
+              placeholder="请输入验证码"
+              @keyup.enter="handleSubmit(1)"
+            >
               <template #prefix>
                 <n-icon size="18" color="#808695">
                   <CreateOutline />
@@ -80,7 +89,11 @@
           v-show="showVerifySms"
         >
           <n-form-item path="verifySmsCode">
-            <n-input v-model:value.trim="smsFormData.verifySmsCode" placeholder="请输入短信验证码">
+            <n-input
+              v-model:value.trim="smsFormData.verifySmsCode"
+              placeholder="请输入短信验证码"
+              @keyup.enter="handleSubmit(2)"
+            >
               <template #prefix>
                 <n-icon size="18" color="#808695">
                   <CreateOutline />
@@ -325,7 +338,7 @@
             showVerifySms.value = false;
           }
         } catch (error) {
-          console.log('error', error);
+          console.error(error);
           message.info('登录失败');
         } finally {
           isValidate.value = false;

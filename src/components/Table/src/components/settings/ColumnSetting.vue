@@ -128,7 +128,7 @@
       const state = reactive({
         selection: false,
         checkAll: true,
-        checkList: [],
+        checkList: [] as any[],
         defaultCheckList: [],
       });
 
