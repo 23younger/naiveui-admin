@@ -8,6 +8,7 @@
       :row-key="(row) => row.id"
       ref="tableRef"
       :actionColumn="actionColumn"
+      :checked-row-keys="checkedKeys"
       @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
     >
@@ -98,7 +99,7 @@
   });
   const onlyAllowNumber = (value: string) => !value || /^\d+$/.test(value);
 
-  const actionColumn = reactive({
+  const actionColumn = {
     width: 200,
     title: '操作',
     titleAlign: 'center',
@@ -142,7 +143,7 @@
         ],
       });
     },
-  });
+  };
 
   const [register, { getFieldsValue }] = useForm({
     gridProps: { cols: '1 s:1 m:2 l:3 xl:4 2xl:4' },
@@ -159,8 +160,8 @@
   }
 
   function reloadTable() {
-    tableRef.value.reload();
     checkedKeys.value = [];
+    tableRef.value.reload();
   }
 
   function createOrEditFn(record: Recordable | undefined) {

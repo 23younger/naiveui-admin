@@ -107,8 +107,11 @@ export function useFormEvents({
     loadingSub.value = value;
   }
 
-  // 设置schema，没有则添加，有则修改，无删除
-  function setSchema(data: Partial<FormSchema> | Partial<FormSchema>[]): Promise<void> | undefined {
+  // 修改schema，在原有schema基础上设置相关表单项，不可添加、删除，只能修改
+  // 对schema可能会有resetSchema、removeSchemaByField、appendSchemaByField，视情况可添加
+  function updateSchema(
+    data: Partial<FormSchema> | Partial<FormSchema>[]
+  ): Promise<void> | undefined {
     let updateSchema: Partial<FormSchema>[] = [];
     if (isObject(data)) {
       updateSchema.push(data as FormSchema);
@@ -146,6 +149,6 @@ export function useFormEvents({
     clearValidate,
     setFieldsValue,
     setLoading,
-    setSchema,
+    updateSchema,
   };
 }

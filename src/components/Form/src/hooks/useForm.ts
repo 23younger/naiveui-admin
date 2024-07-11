@@ -85,9 +85,9 @@ export function useForm(props?: Props): UseFormReturnType {
       loadedRef.value = value;
     },
 
-    setSchema: async (values) => {
+    updateSchema: async (values) => {
       const form = await getForm();
-      form.setSchema(values);
+      form.updateSchema(values);
     },
   };
 

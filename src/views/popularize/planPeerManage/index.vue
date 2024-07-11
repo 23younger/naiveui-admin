@@ -8,6 +8,7 @@
       :row-key="(row) => row.id"
       ref="tableRef"
       :actionColumn="actionColumn"
+      :checked-row-keys="checkedKeys"
       @update:checked-row-keys="onCheckedRow"
       :scroll-x="1090"
     >
@@ -170,8 +171,8 @@
   }
 
   function reloadTable() {
-    tableRef.value.reload();
     checkedKeys.value = [];
+    tableRef.value.reload();
   }
 
   function createOrEditFn(record: Recordable | undefined) {

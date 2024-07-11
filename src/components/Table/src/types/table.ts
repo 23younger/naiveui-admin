@@ -45,6 +45,7 @@ export interface BasicTableProps {
   canResize: boolean;
   resizeHeightOffset: number;
   loading: boolean;
+  maxHeight?: number | string | undefined;
 }
 
 export interface TableSelectionColumnWithKey extends TableSelectionColumn {

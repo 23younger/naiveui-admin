@@ -39,6 +39,10 @@ export const basicProps = {
     type: String,
     default: 'left',
   },
+  ifShow: {
+    type: Boolean,
+    default: true,
+  },
   //组件是否width 100%
   isFull: {
     type: Boolean,

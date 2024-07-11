@@ -40,11 +40,26 @@ export function wrapperEnv(envConf: Recordable): ViteEnv {
 }
 
 /**
+ * 获取当前环境下生效的配置文件名
+ */
+function getConfFiles() {
+  const script = process.env.npm_lifecycle_script;
+  // eslint-disable-next-line prefer-regex-literals
+  const reg = new RegExp('--mode ([a-z_\\d]+)');
+  const result = reg.exec(script as string) as any;
+  if (result) {
+    const mode = result[1] as string;
+    return ['.env', `.env.${mode}`];
+  }
+  return ['.env', '.env.production'];
+}
+
+/**
  * Get the environment variables starting with the specified prefix
  * @param match prefix
  * @param confFiles ext
  */
-export function getEnvConfig(match = 'VITE_GLOB_', confFiles = ['.env', '.env.production']) {
+export function getEnvConfig(match = 'VITE_GLOB_', confFiles = getConfFiles()) {
   let envConfig = {};
   confFiles.forEach((item) => {
     try {

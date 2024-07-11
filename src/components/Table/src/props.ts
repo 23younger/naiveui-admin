@@ -14,7 +14,7 @@ export const basicProps = {
   },
   size: {
     type: String,
-    default: 'medium',
+    default: 'small',
   },
   dataSource: {
     type: [Object],
@@ -57,4 +57,5 @@ export const basicProps = {
   canResize: propTypes.bool.def(true),
   resizeHeightOffset: propTypes.number.def(0),
   striped: propTypes.bool.def(false),
+  showTableSetting: propTypes.bool.def(false),
 };

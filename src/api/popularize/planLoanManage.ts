@@ -9,8 +9,6 @@ export function getTableList(params) {
   });
 }
 
-//
-
 // 单个上下线 /plan/switch
 export function postXdPlanSwitch(params) {
   return http.request(

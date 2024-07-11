@@ -1,87 +1,106 @@
 <template>
   <n-form v-bind="getBindValue" :model="formModel" ref="formElRef">
     <n-grid v-bind="getGrid">
-      <n-gi v-bind="schema.giProps" v-for="schema in getSchema" :key="schema.field">
-        <n-form-item
-          v-bind="schema"
-          :label="schema.label"
-          :path="schema.field"
-          :labelWidth="schema.labelWidth || getProps.labelWidth"
-          :labelStyle="schema.labelStyle || getProps.labelStyle"
-        >
-          <!--标签名右侧温馨提示-->
-          <template #label v-if="schema.labelMessage">
-            {{ schema.label }}
-            <n-tooltip trigger="hover" :style="schema.labelMessageStyle">
-              <template #trigger>
-                <n-icon size="18" class="text-gray-400 cursor-pointer">
-                  <QuestionCircleOutlined />
-                </n-icon>
-              </template>
-              {{ schema.labelMessage }}
-            </n-tooltip>
-          </template>
+      <template v-for="schema in getSchema" :key="schema.field">
+        <n-gi v-bind="schema.giProps" v-if="schema.ifShow !== false">
+          <n-form-item
+            v-bind="schema"
+            :label="schema.label"
+            :path="schema.field"
+            :labelWidth="schema.labelWidth || getProps.labelWidth"
+            :labelStyle="schema.labelStyle || getProps.labelStyle"
+          >
+            <!--标签名右侧温馨提示-->
+            <template #label v-if="schema.labelMessage">
+              {{ schema.label }}
+              <n-tooltip trigger="hover" :style="schema.labelMessageStyle">
+                <template #trigger>
+                  <n-icon size="18" class="text-gray-400 cursor-pointer">
+                    <QuestionCircleOutlined />
+                  </n-icon>
+                </template>
+                {{ schema.labelMessage }}
+              </n-tooltip>
+            </template>
 
-          <!--判断插槽-->
-          <template v-if="schema.slot">
-            <slot
-              :name="schema.slot"
-              :model="formModel"
-              :field="schema.field"
-              :value="formModel[schema.field]"
-            ></slot>
-          </template>
+            <!--判断插槽-->
+            <template v-if="schema.slot">
+              <slot
+                :name="schema.slot"
+                :model="formModel"
+                :field="schema.field"
+                :value="formModel[schema.field]"
+              ></slot>
+            </template>
 
-          <!--NCheckbox-->
-          <template v-else-if="schema.component === 'NCheckbox'">
-            <n-checkbox-group v-model:value="formModel[schema.field]">
-              <n-space>
-                <n-checkbox
-                  v-for="item in getComponentProps(schema).options"
-                  :key="item.value"
-                  :value="item.value"
-                  :label="item.label"
-                />
-              </n-space>
-            </n-checkbox-group>
-          </template>
+            <!--NCheckbox-->
+            <template v-else-if="schema.component === 'NCheckbox'">
+              <n-checkbox-group v-model:value="formModel[schema.field]">
+                <n-space>
+                  <n-checkbox
+                    v-for="item in getComponentProps(schema).options"
+                    :key="item.value"
+                    :value="item.value"
+                    :label="item.label"
+                  />
+                </n-space>
+              </n-checkbox-group>
+            </template>
 
-          <!--NRadioGroup-->
-          <template v-else-if="schema.component === 'NRadioGroup'">
-            <n-radio-group v-model:value="formModel[schema.field]">
-              <n-space>
-                <n-radio
-                  v-for="item in getComponentProps(schema).options"
-                  :key="item.value"
-                  :value="item.value"
-                >
-                  {{ item.label }}
-                </n-radio>
-              </n-space>
-            </n-radio-group>
-          </template>
+            <!--NRadioGroup-->
+            <template v-else-if="schema.component === 'NRadioGroup'">
+              <n-radio-group v-model:value="formModel[schema.field]">
+                <n-space>
+                  <n-radio
+                    v-for="item in getComponentProps(schema).options"
+                    :key="item.value"
+                    :value="item.value"
+                  >
+                    {{ item.label }}
+                  </n-radio>
+                </n-space>
+              </n-radio-group>
+            </template>
 
-          <!-- ty_todo 添加自定义组件 -->
+            <!-- ty_todo 添加自定义组件 -->
+            <!-- ApiNSelect -->
+            <template v-else-if="schema.component === 'ApiNSelect'">
+              <ApiNSelect
+                v-bind="getComponentProps(schema)"
+                :value="formModel[schema.field]"
+                @cus-change="(value) => cusChange(schema.field, value)"
+              />
+            </template>
 
-          <!--动态渲染表单组件-->
-          <component
-            v-else
-            v-bind="getComponentProps(schema)"
-            :is="schema.component"
-            v-model:value="formModel[schema.field]"
-            :class="{ isFull: schema.isFull != false && getProps.isFull }"
-          />
-          <!--组件后面的内容-->
-          <template v-if="schema.suffix">
-            <slot
-              :name="schema.suffix"
-              :model="formModel"
-              :field="schema.field"
-              :value="formModel[schema.field]"
-            ></slot>
-          </template>
-        </n-form-item>
-      </n-gi>
+            <!-- BasicUpload -->
+            <template v-else-if="schema.component === 'BasicUpload'">
+              <BasicUpload
+                v-bind="getComponentProps(schema)"
+                v-model:value="formModel[schema.field]"
+                @upload-change="(value) => cusChange(schema.field, value)"
+              />
+            </template>
+
+            <!--动态渲染表单组件-->
+            <component
+              v-else
+              v-bind="getComponentProps(schema)"
+              :is="schema.component"
+              v-model:value="formModel[schema.field]"
+              :class="{ isFull: schema.isFull != false && getProps.isFull }"
+            />
+            <!--组件后面的内容-->
+            <template v-if="schema.suffix">
+              <slot
+                :name="schema.suffix"
+                :model="formModel"
+                :field="schema.field"
+                :value="formModel[schema.field]"
+              ></slot>
+            </template>
+          </n-form-item>
+        </n-gi>
+      </template>
       <!--提交 重置 展开 收起 按钮-->
       <n-gi
         :span="isInline ? '' : 24"
@@ -139,6 +158,8 @@
 
   import { basicProps } from './props';
   import { DownOutlined, UpOutlined, QuestionCircleOutlined } from '@vicons/antd';
+  import ApiNSelect from './components/ApiNSelect.vue';
+  import BasicUpload from '@/components/Upload/src/BasicUpload.vue';
 
   import type { Ref } from 'vue';
   import type { GridProps } from 'naive-ui/lib/grid';
@@ -153,7 +174,7 @@
 
   export default defineComponent({
     name: 'BasicForm',
-    components: { DownOutlined, UpOutlined, QuestionCircleOutlined },
+    components: { DownOutlined, UpOutlined, QuestionCircleOutlined, ApiNSelect, BasicUpload },
     props: {
       ...basicProps,
     },
@@ -198,6 +219,8 @@
           }
         }
         const component = schema.component;
+        // 针对某些自定义组件处理返回属性值
+        if (['BasicUpload'].includes(schema.component)) return compProps;
         return {
           clearable: true,
           placeholder: createPlaceholderMessage(unref(component)),
@@ -225,7 +248,8 @@
       });
 
       const getGrid = computed((): GridProps => {
-        const { gridProps, showActionButtonGroup } = unref(getProps);
+        // 不设置则默认 cols: '1' 1列展示
+        const { gridProps = { cols: '1' }, showActionButtonGroup } = unref(getProps);
         return {
           ...gridProps,
           collapsed: isInline.value ? (showActionButtonGroup ? gridCollapsed.value : false) : false,
@@ -264,7 +288,7 @@
         clearValidate,
         setFieldsValue,
         setLoading,
-        setSchema,
+        updateSchema,
       } = useFormEvents({
         emit,
         getProps,
@@ -285,6 +309,13 @@
         propsRef.value = deepMerge(unref(propsRef) || {}, formProps);
       }
 
+      // 自定义组件数据变更绑定回调
+      const cusChange = (field, value) => {
+        setFieldsValue({
+          [field]: value,
+        });
+      };
+
       const formActionType: Partial<FormActionType> = {
         getFieldsValue,
         setFieldsValue,
@@ -294,7 +325,7 @@
         setProps,
         submit: handleSubmit,
         setLoading,
-        setSchema,
+        updateSchema,
       };
 
       watch(
@@ -330,6 +361,7 @@
         isInline,
         getComponentProps,
         unfoldToggle,
+        cusChange,
       };
     },
   });

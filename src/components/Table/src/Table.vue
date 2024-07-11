@@ -22,50 +22,52 @@
       <!--顶部右侧区域-->
       <slot name="toolbar"></slot>
 
-      <!--斑马纹-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="mr-2 table-toolbar-right-icon">
-            <n-switch v-model:value="isStriped" @update:value="setStriped" />
-          </div>
-        </template>
-        <span>表格斑马纹</span>
-      </n-tooltip>
-      <n-divider vertical />
+      <template v-if="showTableSetting">
+        <!--斑马纹-->
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <div class="mr-2 table-toolbar-right-icon">
+              <n-switch v-model:value="isStriped" @update:value="setStriped" />
+            </div>
+          </template>
+          <span>表格斑马纹</span>
+        </n-tooltip>
+        <n-divider vertical />
 
-      <!--刷新-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="table-toolbar-right-icon" @click="reload">
-            <n-icon size="18">
-              <ReloadOutlined />
-            </n-icon>
-          </div>
-        </template>
-        <span>刷新</span>
-      </n-tooltip>
-
-      <!--密度-->
-      <n-tooltip trigger="hover">
-        <template #trigger>
-          <div class="table-toolbar-right-icon">
-            <n-dropdown
-              @select="densitySelect"
-              trigger="click"
-              :options="densityOptions"
-              v-model:value="tableSize"
-            >
+        <!--刷新-->
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <div class="table-toolbar-right-icon" @click="reload">
               <n-icon size="18">
-                <ColumnHeightOutlined />
+                <ReloadOutlined />
               </n-icon>
-            </n-dropdown>
-          </div>
-        </template>
-        <span>密度</span>
-      </n-tooltip>
+            </div>
+          </template>
+          <span>刷新</span>
+        </n-tooltip>
 
-      <!--表格设置单独抽离成组件-->
-      <ColumnSetting />
+        <!--密度-->
+        <n-tooltip trigger="hover">
+          <template #trigger>
+            <div class="table-toolbar-right-icon">
+              <n-dropdown
+                @select="densitySelect"
+                trigger="click"
+                :options="densityOptions"
+                v-model:value="tableSize"
+              >
+                <n-icon size="18">
+                  <ColumnHeightOutlined />
+                </n-icon>
+              </n-dropdown>
+            </div>
+          </template>
+          <span>密度</span>
+        </n-tooltip>
+
+        <!--表格设置单独抽离成组件-->
+        <ColumnSetting />
+      </template>
     </div>
   </div>
   <div class="s-table">
@@ -183,7 +185,8 @@
         useColumns(getProps);
 
       const state = reactive({
-        tableSize: unref(getProps as any).size || 'medium',
+        showTableSetting: unref(getProps as any).showTableSetting,
+        tableSize: unref(getProps as any).size || 'small',
         isColumnSetting: false,
       });
 
@@ -224,7 +227,7 @@
           data: tableData,
           size: unref(getTableSize),
           remote: true,
-          'max-height': maxHeight,
+          'max-height': unref(getProps).maxHeight || maxHeight,
         };
       });
 

@@ -1,7 +1,7 @@
 import './styles/tailwind.css';
 import './styles/index.less';
 import { createApp } from 'vue';
-import { setupNaiveDiscreteApi, setupNaive, setupDirectives } from '@/plugins';
+import { setupNaiveDiscreteApi, setupNaive, setupDirectives, setupLibComponents } from '@/plugins';
 import App from './App.vue';
 import router, { setupRouter } from './router';
 import { setupStore } from '@/store';
@@ -20,6 +20,9 @@ async function bootstrap() {
 
   // 注册全局自定义组件
   //setupCustomComponents();
+
+  // 注册第三方库组件
+  setupLibComponents(app);
 
   // 注册全局自定义指令，如：v-permission权限指令
   setupDirectives(app);

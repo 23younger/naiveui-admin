@@ -50,7 +50,12 @@ export const columns: BasicColumnWithSelection = [
               h('span', {}, '无效'),
               h(
                 NTooltip,
-                { trigger: 'click' },
+                {
+                  trigger: 'click',
+                  onUpdateShow(value) {
+                    row.isInvalidPop = value;
+                  },
+                },
                 {
                   trigger: () =>
                     h(
@@ -58,6 +63,10 @@ export const columns: BasicColumnWithSelection = [
                       {
                         size: 18,
                         onClick: () => {
+                          if (row.isInvalidPop) {
+                            return;
+                          }
+                          row.runStatusInfo = '加载中...';
                           planInvalidFn(row)
                             .then((data) => {
                               if (data && data.listInvalid && data.listInvalid.length) {

@@ -133,7 +133,7 @@ export const schemas: FormSchema[] = [
     },
   },
   {
-    field: 'apiId',
+    field: 'maxAmt',
     component: 'NInput',
     label: '借款金额（元）', // 正整数，不得相同
     labelWidth: 'auto',

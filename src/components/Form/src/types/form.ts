@@ -18,6 +18,7 @@ export interface FormSchema {
   slot?: string;
   rules?: object | object[];
   giProps?: GridItemProps;
+  ifShow?: boolean;
   isFull?: boolean;
   suffix?: string;
   showRequireMark?: boolean;
@@ -54,7 +55,7 @@ export interface FormProps {
 export interface FormActionType {
   submit: () => Promise<any>;
   setProps: (formProps: Partial<FormProps>) => Promise<void>;
-  setSchema: (
+  updateSchema: (
     schemaProps: Partial<FormSchema> | Partial<FormSchema>[]
   ) => Promise<void> | undefined;
   setFieldsValue: (values: Recordable) => void;

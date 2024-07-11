@@ -1,7 +1,7 @@
 import { format } from 'date-fns';
 
-const DATE_TIME_FORMAT = 'YYYY-MM-DD HH:mm';
-const DATE_FORMAT = 'YYYY-MM-DD ';
+const DATE_TIME_FORMAT = 'yyyy-MM-dd HH:mm:ss';
+const DATE_FORMAT = 'yyyy-MM-dd ';
 
 export function formatToDateTime(date: Date | number, formatStr = DATE_TIME_FORMAT): string {
   return format(date, formatStr);
@@ -57,4 +57,16 @@ export function dayLIst(day) {
   // 去除daysText最后一个逗号
   daysText = daysText.substring(0, daysText.length - 1);
   return daysText;
+}
+
+// 生成今日年月日
+export function getdate(num) {
+  // num为0 返回年月 为1返回年月日
+  const today = new Date();
+  const year = today.getFullYear(); // 年份
+  let month: number | string = today.getMonth() + 1; // 月份（注意：getMonth()返回值是0-11，因此需要加1）
+  let day: number | string = today.getDate(); // 日期
+  month = month < 10 ? `0${month}` : month;
+  day = day < 10 ? `0${day}` : day;
+  return num === 0 ? year + '.' + month : year + '.' + month + '.' + day;
 }
